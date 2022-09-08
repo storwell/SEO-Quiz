@@ -1,0 +1,632 @@
+function debug(data)
+{
+    console.log(data);
+}
+
+var sw =
+    {
+        init:function()
+             {
+                 var data = 'init storwell ok';
+                 debug(data);
+                 //sw.load_reviews();
+                 //sw.load_last_reviews();
+             },
+        url:
+            {
+                reload: function () {
+                    location.reload();
+                },
+
+                redirect: function (url) {
+                    window.location.replace(url);
+                },
+
+                host: function () {
+                    return window.location.host;
+                },
+
+                current: function () {
+                    //example http://mailer.storwell.local/wp-json/storwell/v1/stats
+                    //return window.location.href; //if use this param - as variant you get url + # from href="#" see current_url
+                    return window.location.protocol + "//" + window.location.hostname + window.location.pathname;
+                }
+
+            },
+
+        load_reviews:function(){
+            //http://mailer.storwell.local/wp-json/reviews/v1/stats
+            //var url         = sw.url.current() + '/wp-json/storwell/v1/stats/';
+            var url         = '/wp-json/storwell/v1/reviews/stats/';
+            var total_stats_div_title   = jQuery('#div_reviews_total_stats_title');
+            var total_stats_div	        = jQuery('#div_reviews_total_stats');
+            var star_stats_div		    = jQuery('#div_reviews_star_stats');
+            var data        = null;
+            jQuery.ajax
+            ({
+                type: 'GET',
+                cache: false,
+                url: url,
+                //data: data,
+
+                success: function(answer)
+                {
+                    //debug(answer);
+                    // var data = jQuery.parseJSON(answer);
+                    //debug(answer.total_stats);
+                    //debug(answer.star_stats);
+                    if (answer.total_stats_title != "") {
+                        total_stats_div_title.html(answer.total_stats_title);
+                    }
+                    if (answer.total_stats != "") {
+                        total_stats_div.html(answer.total_stats);
+                    }
+                    if (answer.star_stats != "") {
+                        star_stats_div.html(answer.star_stats);
+                    }
+
+                },
+                error: function(answer)
+                {
+                    debug(answer)
+                }
+            });
+        },
+        load_last_reviews:function(){
+            //http://mailer.storwell.local/wp-json/reviews/v1/stats
+            //var url         = sw.url.current() + '/wp-json/storwell/v1/reviews/last/';
+            var url         = '/wp-json/storwell/v1/reviews/last/';
+            var div_big_review      = jQuery('#div_big_review');
+            var div_first_review    = jQuery('#div_first_review');
+            var div_second_review   = jQuery('#div_second_review');
+            var div_last_reviews    = jQuery('#div_last_reviews');
+
+            //var data        = null;
+            jQuery.ajax
+            ({
+                type: 'GET',
+                cache: false,
+                url: url,
+                //data: data,
+
+                success: function(answer)
+                {
+                    //debug(answer);
+                    // var data = jQuery.parseJSON(answer);
+                    //debug(answer.total_stats);
+                    //debug(answer.last_reviews_for_main_page);
+                    if (answer.big_review_for_main_page != "") {
+                        div_big_review.html(answer.big_review_for_main_page);
+                    }
+                    if (answer.first_review_for_main_page != "") {
+                        div_first_review.html(answer.first_review_for_main_page);
+                    }
+                    if (answer.second_review_for_main_page != "") {
+                        div_second_review.html(answer.second_review_for_main_page);
+                    }
+                    if (answer.last_reviews_for_main_page != "") {
+                        div_last_reviews.html(answer.last_reviews_for_main_page);
+                    }
+                },
+                error: function(answer)
+                {
+                    debug(answer)
+                }
+            });
+        },
+
+        load_unit_size_info:function(unit_size,location_id,div_id){
+            //http://dev.storwell.local/wp-json/storwell/v1/location/1/unit/10x15
+            //var url         = sw.url.current() + '/wp-json/storwell/v1/stats/';
+            var url                 = '/wp-json/storwell/v1/location/' + location_id + '/unit/' + unit_size;
+            var div_unit_size_info  = jQuery('#'+div_id);
+            var data        = null;
+            jQuery.ajax
+            ({
+                type: 'GET',
+                cache: false,
+                url: url,
+                //data: data,
+                success: function(answer)
+                {
+                    debug(answer);
+                    // var data = jQuery.parseJSON(answer);
+                    //debug(answer.total_stats);
+                    //debug(answer.star_stats);
+                    if (answer.unit_size_info != "") {
+                        div_unit_size_info.html(answer.unit_size_info.rate);
+                    }
+                },
+                error: function(answer)
+                {
+                    debug(answer)
+                }
+            });
+        },
+
+        phone:{
+
+            //!!!!!not used!!!!!. I use validation.js validate_phone_field
+            validate_phone_number: function(phone){
+                var url = '/wp-json/storwell/v1/phone/validate/';
+
+                jQuery.ajax
+                ({
+                    type: 'GET',
+                    cache: false,
+                    async: false,//!!!! only sync request need!!!
+                    url: url,
+                    data: {
+                        "phone_number": phone
+                    },
+                    success: function(answer)
+                    {
+                        debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        if (answer.success){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    },
+                    error: function(answer)
+                    {
+                        debug(answer);
+                        return false;
+                    }
+                });
+            }
+        },
+
+        locations:{
+
+            get_storage_near_me: function(){
+                let postcode        = jQuery('#postcode_for_find_storage_near_me');
+                var div_for_results = jQuery('#result_find_storage_bear_me');
+
+                console.log('value postcode=' + postcode.val() );
+
+                //alert('before send data');
+
+                var url = '/wp-json/storwell/v1/location/near-me/';
+
+                //var data        = null;
+                jQuery.ajax
+                ({
+                    type: 'GET',
+                    cache: false,
+                    url: url,
+                    data: {
+                        "postcode": postcode.val()
+                    },
+                    success: function(answer)
+                    {
+                        //debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        //debug(answer.total_stats);
+                        //debug(answer.star_stats);
+                        if (!answer.storage_near_me_info){
+                            div_for_results.hide();
+                        }
+                        else{
+                            div_for_results.show();
+                        }
+
+                        if (answer.storage_near_me_info != "") {
+                            //console.log(answer.rent_info);
+                            div_for_results.html(answer.storage_near_me_info);
+                        }
+                    },
+                    error: function(answer)
+                    {
+                        debug(answer)
+                    }
+                });
+
+
+            }
+
+        },
+
+        rent:{
+            selected_loc_id: null,
+
+            show_spinner:function(div_id){
+                console.log('show_spinner ' + div_id);
+                var div_spinner = jQuery('#'+div_id);
+                div_spinner.show();
+
+
+            },
+            hide_spinner:function(div_id){
+                console.log('hide_spinner ' + div_id);
+                var div_spinner = jQuery('#'+div_id);
+                div_spinner.css('display','none');
+                //div_spinner.hide();
+            },
+
+            show_locations: function(div_id,selected_loc_id){
+                console.log('show_locations ' + div_id);
+                var div_locations = jQuery('#'+div_id);
+
+                //change span
+                let selected_loc = jQuery('label[for="rent_location_' + selected_loc_id + '"]')
+                selected_loc.find('.rent_location_span_title_change_loc').hide();
+                selected_loc.find('.rent_location_span_title_selected').show();
+                selected_loc.find('.rent_location_span_title_choose_loc').hide();
+
+                // Only for mobile
+                if (jQuery( document ).width() < 670) {
+                    jQuery('#rent_current_location_info').hide();
+                }
+
+                div_locations.show();
+            },
+            hide_locations: function(div_id){
+                console.log('hide_locations ' + div_id);
+                var div_locations = jQuery('#'+div_id);
+
+                //change span
+                let selected_loc = jQuery('label[for="rent_location_' + sw.rent.selected_loc_id + '"]')
+
+                selected_loc.find('.rent_location_span_title_change_loc').show();
+                selected_loc.find('.rent_location_span_title_selected').hide();
+                selected_loc.find('.rent_location_span_title_choose_loc').hide();
+
+                // Only for mobile
+                if (jQuery( document ).width() < 670) {
+                    jQuery('#rent_current_location_info').show();
+                }
+                div_locations.hide();
+            },
+
+            selectUnitsForLocID: function(selector, parent, cur_loc_container, loc_id) {
+
+                let att = 'data-parent="' + loc_id + '"';
+                let all_items_att = 'data-att-menu-item';
+
+                //Locations functional
+                sw.rent.selected_loc_id = loc_id;
+
+                //all set start data
+                jQuery(parent).find('[data-att-label-loc-item]').each(function(){
+                    jQuery(this).find('.rent_location_span_title_change_loc').hide();
+                    jQuery(this).find('.rent_location_span_title_selected').hide();
+                    jQuery(this).find('.rent_location_span_title_choose_loc').show();
+                 });
+
+                //before copy to rent_current_location_info for selected location - change status
+                jQuery('[data-label-loc="'+loc_id+'"]').find('.rent_location_span_title_change_loc').show();
+                jQuery('[data-label-loc="'+loc_id+'"]').find('.rent_location_span_title_selected').hide();
+                jQuery('[data-label-loc="'+loc_id+'"]').find('.rent_location_span_title_choose_loc').hide();
+                jQuery('#rent_current_location_info').show();
+
+                //Units functional
+                let loc_info = jQuery('label[for="rent_location_' + loc_id + '"]').html();//current location
+                jQuery(cur_loc_container).html(loc_info);//set to current location container data from radio
+                //console.log("loc_info:");
+                //console.log(loc_info);
+
+
+                jQuery(selector).find('[' + all_items_att + ']').hide();//hide all option
+                jQuery(selector).find('[' + att + ']').show();//show only options current location
+
+                //Set new element after select location
+                let old_select_unit = jQuery(selector+' option:selected').html();
+                console.log('old_select_unit=' + old_select_unit);
+
+                jQuery(selector).find('[' + att + ']').filter(':first').prop('selected', true);//select first element
+                jQuery(selector).find('[' + att + ']').filter('option[value='+old_select_unit+']').prop('selected', true);//try select equal previous unit size
+
+
+                jQuery(parent).hide();
+
+                sw.rent.change_phone_number(loc_id);
+
+                sw.rent.get_price_info();
+            },
+
+            rent_unit: function(form_id,next_step,spinner_id){
+                var url = '/wp-json/storwell/v1/rent/rent_unit/';
+
+                var form = jQuery('#' + form_id);
+                var m_method=form.attr('method');
+                //url=form.attr('action');
+                var m_data=form.serialize();
+
+                jQuery('#citelink_rent_result').html();
+                jQuery('#citelink_rent_result').hide();
+
+                jQuery.ajax
+                ({
+                    type: m_method,//'GET'//m_method
+                    cache: false,
+                    //async: false, //or spinner not show
+                    url: url,
+                    data: m_data,
+                    beforeSend: function() {
+                        sw.rent.show_spinner(spinner_id);
+                        // setTimeout(function(){
+                        //     jQuery("#test_spinner").show();
+                        // }, 1);
+                        //jQuery("#test_spinner").show(1);
+                    },
+                    complete: function() {
+                        //jQuery("#test_spinner").hide();
+                        sw.rent.hide_spinner(spinner_id);
+                    },
+                    success: function(answer)
+                    {
+                        //debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        //alert('before spinner hide success true');
+                        //jQuery('#'+spinner_id).hide();
+                        if (answer.success){
+                            window.location.href = next_step;
+                            return true;
+                        }
+                        else{
+                            jQuery('#citelink_rent_result').html(answer.message);
+                            jQuery('#citelink_rent_result').show();
+                            }
+                    },
+                    error: function(answer)
+                    {
+                        //alert('before spinner hide');
+                        sw.rent.hide_spinner(spinner_id);
+                        //jQuery('#'+spinner_id).hide();
+                        jQuery('#citelink_rent_result').html(answer.message);
+                        jQuery('#citelink_rent_result').show();
+                        debug(answer);
+
+                    }
+                });
+
+                //jQuery('#my_loading_overlay').hide();
+                return false;
+            },
+
+            change_phone_number: function(loc_id){
+
+                jQuery('#toronto-phone').hide();
+                jQuery('#mississauga-phone').hide();
+                jQuery('#scarborough-phone').hide();
+
+                switch (loc_id) {
+                    case 1: jQuery('#toronto-phone').show();
+                        break;
+                    case 2: jQuery('#mississauga-phone').show();
+                        break;
+                    case 3: jQuery('#scarborough-phone').show();
+                        break;
+                    default : jQuery('#toronto-phone').show();
+                }
+
+            },
+
+            get_price_info: function(){
+
+
+                //total_info_first_4_weeks
+                //total_info_second_4_weeks
+                //total_info_hst
+                //total_info_total
+
+                var div_total_block                 = jQuery('#div_total_block');
+                var td_total_info_first_4_weeks     = jQuery('#total_info_first_4_weeks');
+                var tr_second_4_weeks               = jQuery('#tr_second_4_weeks');//not show if no special or select Free van (only 4 weeks)
+                var td_total_info_second_4_weeks    = jQuery('#total_info_second_4_weeks');
+                var td_total_info_hst               = jQuery('#total_info_hst');
+                var td_total_info_total             = jQuery('#total_info_total');
+
+
+                let unit_size       = jQuery('#rent_unit_selector').find(':selected').val();
+                let location_id     = jQuery('#rent_unit_selector').find(':selected').data('parent');
+                let special_offer   = jQuery('input[name="rent[special_offer]"]:checked').val();
+
+                //console.log('value unit_size=' + unit_size );
+                //console.log('location_id=' + location_id );
+                //console.log('special_offer='+special_offer);
+
+                var url = '/wp-json/storwell/v1/rent/unit/cost/';
+
+                // show text about 4 weeks free only if option selected
+                if(jQuery('#special_offer_first_4_weeks_free').is(':checked')) {
+                    jQuery('#weeks_free_text').show();
+                }
+                else {
+                    jQuery('#weeks_free_text').hide();
+                }
+
+                div_total_block.hide();
+
+                //var data        = null;
+                jQuery.ajax
+                ({
+                    type: 'GET',
+                    cache: false,
+                    url: url,
+                    data: {
+                        "unit_size": unit_size,
+                        "location_id": location_id,
+                        "special_offer": special_offer
+                    },
+                    success: function(answer)
+                    {
+                        debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        //debug(answer.total_stats);
+                        //debug(answer.star_stats);
+                        if (!answer.special_offer_enabled){
+                            jQuery('#rent_special_offer_container').hide();
+                        }
+                        else{
+                            jQuery('#rent_special_offer_container').show();
+                        }
+
+                        if (answer.rent_info != "") {
+                            //console.log(answer.rent_info);
+                            div_total_block.show();
+                            td_total_info_first_4_weeks.html('$'+answer.rent_info.first_4_weeks);
+                            tr_second_4_weeks.hide();
+                            if (answer.special_offer_enabled){
+                                if (answer.special_offer == 'first_4_weeks_free'){
+                                    tr_second_4_weeks.show();
+                                    td_total_info_second_4_weeks.html('$'+answer.rent_info.second_4_weeks);
+                                }
+                            }
+                            td_total_info_hst.html('$'+answer.rent_info.hst);
+                            td_total_info_total.html('$'+answer.rent_info.total);
+                            //div_unit_size_info.html(answer.unit_size_info.rate);
+                        }
+                        else{
+                            div_total_block.hide();
+                        }
+                    },
+                    error: function(answer)
+                    {
+                        debug(answer)
+                    }
+                });
+
+
+            }
+        },
+
+        get_a_quote:{
+
+            save_step: function(form_id,next_step){
+
+                var url = '/wp-json/storwell/v1/get_a_quote/save_step/';
+
+                var form = jQuery('#' + form_id);
+                var m_method=form.attr('method');
+                //url=form.attr('action');
+                var m_data=form.serialize();
+
+                jQuery.ajax
+                ({
+                    type: m_method,//'GET'//m_method
+                    cache: false,
+                    async: false,
+                    url: url,
+                    data: m_data,
+                    success: function(answer)
+                    {
+                        //debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        if (answer.success){
+                            window.location.href = next_step;
+                            return true;
+                        }
+                    },
+                    error: function(answer)
+                    {
+                        //debug(answer);
+                    }
+                });
+
+
+/*                jQuery('#' + form_id).submit(function(e){
+                    e.preventDefault();
+                    var form = jQuery(this);
+                    var m_method=form.attr('method');
+                    var m_action=form.attr('action');
+                    var m_action='/wp-json/storwell/v1/get_a_quote/save_step/';
+                    var m_data=form.serialize();
+                    form.find("input[type=submit]").attr('disabled', true);
+                    jQuery.ajax({
+                        type: m_method,
+                        url: m_action,
+                        data: m_data,
+                        beforeSend: function(){
+                            //jQuery('#fprogress').show();
+                        },
+                        success: function(request){
+
+                            debug(request);
+                            //jQuery('#fprogress').hide();
+                            // var res = request.replace(/\n/g,' ').replace(/\r/g,'').match(/<body.*body>/ig);
+                            // res = jQuery('<div></div>').html(res[0]);
+                            // form.html(res.find('div.thankyou,form').html());
+                            // form.find("input[type='submit']").attr('disabled', false);
+                        },
+                        complete: function(){
+                            //jQuery('#fprogress').hide();
+                        }
+                    });
+                });*/
+
+                return false;
+            }
+        },
+
+        ask_a_question:{
+            save_step: function(form_id,next_step){
+
+                var url = '/wp-json/storwell/v1/ask_a_question/save_step/';
+
+                var form = jQuery('#' + form_id);
+                var m_method=form.attr('method');
+                //url=form.attr('action');
+                var m_data=form.serialize();
+                jQuery.ajax
+                ({
+                    type: m_method,//'GET'//m_method
+                    cache: false,
+                    async: false,
+                    url: url,
+                    data: m_data,
+                    success: function(answer)
+                    {
+                        //debug(answer);
+                        // var data = jQuery.parseJSON(answer);
+                        if (answer.success){
+                            window.location.href = next_step;
+                            return true;
+                        }
+                    },
+                    error: function(answer)
+                    {
+                        //debug(answer);
+                    }
+                });
+
+                return false;
+            }
+        },
+
+        special_offers_window:{
+
+            show: function () {
+                jQuery("#rentUnitModal").show();
+                jQuery('#rentUnitModal').css('display', 'flex');
+            },
+
+            hide: function () {
+                jQuery("#rentUnitModal").hide();
+            }
+
+        },
+        special_offers_info:{
+
+            toggle: function (el) {
+                if(jQuery('#'+el).css('display') == 'none')
+                {
+                    jQuery('#'+el).show();
+                }
+                else {
+                    jQuery('#'+el).hide();
+                }
+
+            }
+
+        }
+    }
+
+jQuery(document).ready(function( $ ) {
+    sw.init();
+});
+
+
