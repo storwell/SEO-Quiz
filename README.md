@@ -1,6 +1,6 @@
 # SEO Quiz
 
-This quiz has two parts. An on page optimization portion, and and an off page optimization portion. Please submit both parts to be considered. You may submit your responses in a simple text file, no special formatting is required.
+This quiz has two parts. An on page optimization portion, and an off page optimization portion. Please submit both parts to be considered. Please submit your responses in a text file by email. Do not put the responses directly in the email body, include it as an attachment. No special formatting is required.
 
 ## Part 1 - On Page Optimization
 
